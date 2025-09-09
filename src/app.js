@@ -18,6 +18,6 @@ app.get("/", (req, res) => {
 
 module.exports = app;
 
-// Import và sử dụng các routes
-const helloRoutes = require('./routes/helloRoutes');
-app.use('/', helloRoutes);
+// Import và sử dụng rootRouter
+const rootRouter = require('./routes/rootRouter');
+app.use('/', rootRouter);
