@@ -1,8 +1,23 @@
-// src/middlewares/authMiddleware.js
-// Middleware check auth giả
-const authMiddleware = (req, res, next) => {
-  console.log("🔑 Auth checked (fake)!");
-  next();
-};
+const jwt = require('jsonwebtoken');
 
-module.exports = authMiddleware;
+exports.authMiddleware = (req, res, next) => {
+    const token = req.header('Authorization')?.replace('Bearer ', '');
+    if (!token) {
+        return res.status(401).json({ error: 'No token, authorization denied' });
+    }
+    try {
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        req.user = decoded; // { id, role, iat, exp }
+        next();
+    } catch (error) {
+        res.status(401).json({ error: 'Token is not valid' });
+    }
+};
+exports.authorizeRoles = (...roles) => {
+    return (req, res, next) => {
+        if (!roles.includes(req.user.role)) {
+            return res.status(403).json({ error: `Role ${req.user.role} is not authorized to access this resource` });
+        }
+        next();
+    };
+};
