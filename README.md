@@ -27,7 +27,8 @@ Development (auto reload bằng nodemon):
 Production:
 
     npm start
-
+swagger 
+.../api-docs
 📂 Cấu trúc thư mục
 src/
  ┣ config/        # Cấu hình (DB, JWT,...)
