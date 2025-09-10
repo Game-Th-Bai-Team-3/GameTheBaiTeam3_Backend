@@ -4,9 +4,11 @@ const router = express.Router();
 // Import các router con
 const helloRoutes = require('./helloRoutes');
 const authRoutes = require('./authRoutes');
+const protectedRoutes = require('./protectedRoutes');
 
-// Gộp các router con vào router gốc
-router.use('/', helloRoutes);
-router.use('/', authRoutes);
+// Gắn prefix cho từng router con
+router.use('/hello', helloRoutes);           // ví dụ: /hello/...
+router.use('/auth', authRoutes);             // ví dụ: /auth/login, /auth/register
+router.use('/api', protectedRoutes);         // ví dụ: /api/protected
 
 module.exports = router;

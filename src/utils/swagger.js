@@ -3,6 +3,7 @@ const swaggerUi = require('swagger-ui-express');
 
 require('dotenv').config();
 const port = process.env.PORT || 3000;
+
 const options = {
   definition: {
     openapi: '3.0.0',
@@ -14,6 +15,21 @@ const options = {
     servers: [
       {
         url: `http://localhost:${port}`,
+      },
+    ],
+    components: {
+      securitySchemes: {
+        BearerAuth: {
+          type: 'http',
+          scheme: 'bearer',
+          bearerFormat: 'JWT',
+          description: 'Nhập JWT token để authorize các API protected',
+        },
+      },
+    },
+    security: [
+      {
+        BearerAuth: [],
       },
     ],
   },
