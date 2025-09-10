@@ -7,7 +7,7 @@ const router = express.Router();
 
 /**
  * @swagger
- * /register:
+ * /auth/register:
  *   post:
  *     summary: Đăng ký người dùng mới
  *     tags:
@@ -49,7 +49,7 @@ router.post('/register', register);
 
 /**
  * @swagger
- * /login:
+ * /auth/login:
  *   post:
  *     summary: Đăng nhập người dùng
  *     tags:
