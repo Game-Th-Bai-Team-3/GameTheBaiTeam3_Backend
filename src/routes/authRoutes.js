@@ -2,7 +2,7 @@ const express = require('express');
 
 const {register, login} = require('../controllers/authController');
 const {authMiddleware, authorizeRoles} = require('../middlewares/authMiddleware');
-
+const {validateRegister} = require('../middlewares/validateUser');
 const router = express.Router();
 
 /**
@@ -45,7 +45,7 @@ const router = express.Router();
  *       400:
  *         description: Dữ liệu đầu vào không hợp lệ
  */
-router.post('/register', register);
+router.post('/register',validateRegister, register);
 
 /**
  * @swagger
