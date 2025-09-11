@@ -95,7 +95,7 @@ router.post('/', protect, createCard);
  *             schema:
  *               type: array
  *               items:
- *                 $ref: '#/components/schemas/Card'
+ *                 
  *       400:
  *         description: Lỗi khi lấy dữ liệu
  */
@@ -122,7 +122,7 @@ router.get('/', getAllCards);
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/Card'
+ *               
  *       404:
  *         description: Không tìm thấy thẻ bài
  *       400:
@@ -174,7 +174,7 @@ router.get('/:id', getCardById);
  *                   type: string
  *                   example: "Thẻ bài đã được cập nhật thành công"
  *                 card:
- *                   $ref: '#/components/schemas/Card'
+ *                   
  *       404:
  *         description: Không tìm thấy thẻ bài
  *       400:
