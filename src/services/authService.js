@@ -9,26 +9,24 @@ const  sendOtp  = require("../utils/sendOtp");
 
 
 // Đăng ký người dùng mới
-exports.register = async ({username, email, password, role}) => {
+exports.register = async ({ username, email, password, role }) => {
     // Kiểm tra nếu email đã tồn tại
     const existingEmail = await User.findOne({ email });
     if (existingEmail) {
         throw new Error("Email đã tồn tại");
     }
-    //tạo user chưa verify 
-
-    const user = await User.create({ username, email, password, role, isVerified: false });
 
     // Tạo OTP
-    const otp = otpGenerator.generate(6, 
-        { upperCaseAlphabets: false, 
-            specialChars: false,
-             lowerCaseAlphabets: false });
-    //xoa otp cu neu co
+    const otp = otpGenerator.generate(6, {
+        upperCaseAlphabets: false,
+        specialChars: false,
+        lowerCaseAlphabets: false
+    });
+
+    // Xóa OTP cũ nếu có
     await OTP.deleteMany({ email });
 
-
-    // Lưu OTP vào database
+    // Hash OTP và lưu vào DB
     const hashedOtp = await hashPassword(otp);
     await OTP.create({
         email,
@@ -36,10 +34,25 @@ exports.register = async ({username, email, password, role}) => {
         expiresAt: Date.now() + 10 * 60 * 1000 // 10 phút
     });
 
-    // Gửi OTP qua email
-    await sendOtp(email, otp);
+    // Thử gửi OTP qua email
+    try {
+        await sendOtp(email, otp);
+    } catch (err) {
+        // Nếu gửi thất bại thì xóa OTP
+        await OTP.deleteMany({ email });
+        throw new Error("Không thể gửi OTP. Vui lòng thử lại sau.");
+    }
 
-   return { message: "Đăng ký thành công, vui lòng kiểm tra email để xác thực OTP" };
+    // Nếu gửi OTP ok thì mới tạo user
+    const user = await User.create({
+        username,
+        email,
+        password,
+        role,
+        isVerified: false
+    });
+
+    return { message: "Đăng ký thành công, vui lòng kiểm tra email để xác thực OTP" };
 };
 
 // kiem tra otp
