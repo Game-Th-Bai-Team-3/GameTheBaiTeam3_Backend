@@ -1,8 +1,8 @@
 const express = require('express');
 
-const {register, login} = require('../controllers/authController');
+const {register, login, forgotPassword, resetPassword} = require('../controllers/authController');
 const {authMiddleware, authorizeRoles} = require('../middlewares/authMiddleware');
-const {validateRegister} = require('../middlewares/validateUser');
+const {validateRegister, validateForgotPassword, validateResetPassword} = require('../middlewares/validateUser');
 const router = express.Router();
 
 /**
@@ -88,6 +88,95 @@ router.post('/register',validateRegister, register);
  */
 router.post('/login', login);
 
+/**
+ * @swagger
+ * /auth/forgot-password:
+ *   post:
+ *     summary: Quên mật khẩu - Tạo reset token
+ *     tags:
+ *       - Auth
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - email
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 format: email
+ *                 example: johndoe@example.com
+ *                 description: Email của tài khoản cần reset mật khẩu
+ *     responses:
+ *       200:
+ *         description: Reset token đã được tạo thành công
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Email reset mật khẩu đã được gửi thành công. Vui lòng kiểm tra hộp thư của bạn.
+ *                 email:
+ *                   type: string
+ *                   example: johndoe@example.com
+ *                   description: Email đã được gửi reset link
+ *                 expiry:
+ *                   type: string
+ *                   format: date-time
+ *                   example: 2024-01-01T10:10:00.000Z
+ *                   description: Thời gian hết hạn của reset token
+ *       400:
+ *         description: Email không hợp lệ hoặc không tồn tại
+ */
+router.post('/forgot-password', validateForgotPassword, forgotPassword);
+
+/**
+ * @swagger
+ * /auth/reset-password:
+ *   post:
+ *     summary: Đặt lại mật khẩu với reset token
+ *     tags:
+ *       - Auth
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - token
+ *               - newPassword
+ *             properties:
+ *               token:
+ *                 type: string
+ *                 example: a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6
+ *                 description: Reset token nhận được từ forgot-password API
+ *               newPassword:
+ *                 type: string
+ *                 format: password
+ *                 example: NewStrongPass123
+ *                 description: Mật khẩu mới (ít nhất 6 ký tự)
+ *     responses:
+ *       200:
+ *         description: Đặt lại mật khẩu thành công
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Đặt lại mật khẩu thành công
+ *       400:
+ *         description: Token không hợp lệ, đã hết hạn hoặc dữ liệu không hợp lệ
+ */
+router.post('/reset-password', validateResetPassword, resetPassword);
+
+// Email service routes
 
 
 
