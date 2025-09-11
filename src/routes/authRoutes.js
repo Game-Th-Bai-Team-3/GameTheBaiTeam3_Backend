@@ -1,6 +1,8 @@
 const express = require('express');
 
-const {register, login, forgotPassword, resetPassword} = require('../controllers/authController');
+const {register, login, verifyOtp, forgotPassword, resetPassword } = require('../controllers/authController');
+
+
 const {authMiddleware, authorizeRoles} = require('../middlewares/authMiddleware');
 const {validateRegister, validateForgotPassword, validateResetPassword} = require('../middlewares/validateUser');
 const router = express.Router();
@@ -46,6 +48,47 @@ const router = express.Router();
  *         description: Dữ liệu đầu vào không hợp lệ
  */
 router.post('/register',validateRegister, register);
+
+/**
+ * @swagger
+ * /auth/verify-otp:
+ *   post:
+ *     summary: Xác thực tài khoản bằng OTP
+ *     tags:
+ *       - Auth
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - email
+ *               - otp
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 format: email
+ *                 example: johndoe@example.com
+ *               otp:
+ *                 type: string
+ *                 example: "123456"
+ *     responses:
+ *       200:
+ *         description: Xác thực OTP thành công
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Xác thực thành công, bạn có thể đăng nhập
+ *       400:
+ *         description: OTP không hợp lệ hoặc đã hết hạn
+ */
+router.post('/verify-otp', verifyOtp);
+
 
 /**
  * @swagger
@@ -177,6 +220,7 @@ router.post('/forgot-password', validateForgotPassword, forgotPassword);
 router.post('/reset-password', validateResetPassword, resetPassword);
 
 // Email service routes
+
 
 
 
