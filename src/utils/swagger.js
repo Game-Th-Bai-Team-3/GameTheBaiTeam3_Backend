@@ -1,8 +1,13 @@
+require('dotenv').config();  // Load .env đầu tiên
+
+const port = process.env.PORT || 3000;
+
+const SERVER_URL = process.env.NODE_ENV === 'production'
+  ? process.env.SERVER_URL   // set trong Render Environment Variables
+  : `http://localhost:${port}`;
+
 const swaggerJsdoc = require('swagger-jsdoc');
 const swaggerUi = require('swagger-ui-express');
-
-require('dotenv').config();
-const port = process.env.PORT || 3000;
 
 const options = {
   definition: {
@@ -13,9 +18,7 @@ const options = {
       description: 'API documentation for Game The Bai Team 3',
     },
     servers: [
-      {
-        url: `http://localhost:${port}`,
-      },
+      { url: SERVER_URL },  // Dùng đúng URL deploy hoặc localhost
     ],
     components: {
       securitySchemes: {
@@ -28,12 +31,10 @@ const options = {
       },
     },
     security: [
-      {
-        BearerAuth: [],
-      },
+      { BearerAuth: [] },
     ],
   },
-  apis: ['./src/routes/*.js', './src/controllers/*.js'], // Đường dẫn tới các file chứa API docs
+  apis: ['./src/routes/*.js', './src/controllers/*.js'],
 };
 
 const swaggerSpec = swaggerJsdoc(options);
