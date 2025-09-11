@@ -38,7 +38,7 @@ const router = express.Router();
  *               role:
  *                 type: string
  *                 enum: [user, admin]
- *                 example: user
+ *                 example: admin
  *     responses:
  *       201:
  *         description: Người dùng đã được tạo thành công

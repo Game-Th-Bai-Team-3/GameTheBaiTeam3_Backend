@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const { protectedRoute } = require("../controllers/protectedController");
-const { protect } = require("../middlewares/authMiddleware");
+const { protect,authorizeRoles } = require("../middlewares/authMiddleware");
 
 /**
  * @swagger
@@ -16,6 +16,8 @@ const { protect } = require("../middlewares/authMiddleware");
  *       401:
  *         description: Token không hợp lệ hoặc chưa đăng nhập
  */
-router.get("/protected", protect, protectedRoute);
+//day la cach de phan quyen cho tung role co ca xac thuc dang nhap (cai protect)la xac thuc co dang nhap
+//hay khong con authorizeRoles("user","admin") la phan quyen cho tung role
+router.get("/protected", protect,authorizeRoles("user","admin"), protectedRoute);
 
 module.exports = router;
