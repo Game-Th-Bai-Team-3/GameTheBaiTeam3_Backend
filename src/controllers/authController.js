@@ -30,6 +30,17 @@ exports.login = async (req, res) => {
    } 
 };
 
+// Thay đổi mật khẩu bằng mật khẩu hiện tại
+exports.changePassword = async (req, res) => {
+   try {
+      const result = await authService.changePassword(req.body);
+      res.status(200).json(result);
+   } catch (error) {
+      res.status(400).json({ error: error.message });
+   }
+};
+
+// Tạo token đặt lại mật khẩu và gửi email
 exports.forgotPassword = async (req, res) => {
    try {
       const result = await authService.forgotPassword(req.body);
@@ -39,6 +50,7 @@ exports.forgotPassword = async (req, res) => {
    }
 };
 
+// Thay đổi mật khẩu bằng token
 exports.resetPassword = async (req, res) => {
    try {
       const result = await authService.resetPassword(req.body);

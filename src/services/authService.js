@@ -98,6 +98,24 @@ exports.login = async ({email, password}) => {
     return { message: "Đăng nhập thành công", token, user: { id: user._id, username: user.username, email: user.email, role: user.role } };
 };
 
+// Cập nhật mật khẩu bằng mật khẩu hiện tại
+exports.changePassword = async ({ email, currentPassword, newPassword }) => {
+    const user = await User.findOne({ email });
+    if (!user) {
+        throw new Error("Email không tồn tại");
+    }
+
+    const isMatch = await comparePassword(currentPassword, user.password);
+    if (!isMatch) {
+        throw new Error("Mật khẩu không đúng");
+    }
+
+    // Mật khẩu mới sẽ được hash tự động bởi middleware
+    user.password = newPassword;
+    await user.save();
+
+    return { message: "Thay đổi mật khẩu thành công" };
+};
 // Quên mật khẩu - gửi email reset password
 exports.forgotPassword = async ({ email }) => {
     console.log('🔍 [DEBUG] Checking email:', email);

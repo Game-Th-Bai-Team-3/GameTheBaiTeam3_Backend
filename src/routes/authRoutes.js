@@ -1,6 +1,7 @@
 const express = require('express');
 
-const {register, login, verifyOtp, forgotPassword, resetPassword } = require('../controllers/authController');
+const {register, login, verifyOtp, forgotPassword, 
+    resetPassword, changePassword } = require('../controllers/authController');
 
 
 const {authMiddleware, authorizeRoles} = require('../middlewares/authMiddleware');
@@ -130,6 +131,53 @@ router.post('/verify-otp', verifyOtp);
  *         description: Email hoặc mật khẩu không đúng
  */
 router.post('/login', login);
+
+/**
+ * @swagger
+ * /auth/change-password:
+ *   post:
+ *     summary: Thay đổi mật khẩu người dùng
+ *     tags:
+ *       - Auth
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - email
+ *               - currentPassword
+ *               - newPassword
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 format: email
+ *                 example: johndoe@example.com
+ *               currentPassword:
+ *                 type: string
+ *                 format: password
+ *                 example: CurPass123
+ *               newPassword:
+ *                 type: string
+ *                 format: password
+ *                 example: NewPass456
+ *     responses:
+ *       200:
+ *         description: Đổi mật khẩu thành công
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Mật khẩu đã được thay đổi thành công.
+ *       400:
+ *         description: Email hoặc mật khẩu hiện tại không đúng
+ */
+router.post('/change-password', changePassword);
+
 
 /**
  * @swagger
