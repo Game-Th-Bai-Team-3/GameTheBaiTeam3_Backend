@@ -27,8 +27,10 @@ Development (auto reload bằng nodemon):
 Production:
 
     npm start
-swagger 
-.../api-docs
+Link Test Swagger 
+
+
+Localhost:.... /api-docs 
 
 
 📂 Cấu trúc thư mục
