@@ -17,7 +17,10 @@ const cardSchema = new mongoose.Schema({
     baseCards : [{ 
         type: mongoose.Schema.Types.ObjectId, ref: 'Card'
     }],
-    image : { type: String  },
+    image: {
+    data: Buffer,
+    contentType: String
+}
     
 }, { timestamps: true });
 
