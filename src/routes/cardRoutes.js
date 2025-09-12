@@ -68,6 +68,7 @@ const {
  *                 description: Mảng các ID của thẻ cơ sở có thể để trống (nếu để trống thì xóa cái ""string" đi)
  *                 items:
  *                   type: string
+ *                   example: null
  *               image:
  *                 type: string
  *                 example: "http://example.com/image.png"
