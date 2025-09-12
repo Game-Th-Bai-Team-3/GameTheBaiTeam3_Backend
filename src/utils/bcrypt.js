@@ -1,5 +1,4 @@
 const bcrypt = require('bcrypt');
-const e = require('express');
 const SALT_ROUNDS = 10;
 
 const hashPassword = async (password) => {

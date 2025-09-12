@@ -1,8 +1,8 @@
 const express = require('express');
 
-const {register, login} = require('../controllers/authController');
+const {register, login, verifyOtp, forgotPassword, resetPassword, changePassword} = require('../controllers/authController');
 const {authMiddleware, authorizeRoles} = require('../middlewares/authMiddleware');
-const {validateRegister} = require('../middlewares/validateUser');
+const {validateRegister, validateForgotPassword, validateResetPassword, validateLogin, validateVerifyOtp, validateChangePassword} = require('../middlewares/validateUser');
 const router = express.Router();
 
 /**
@@ -86,7 +86,17 @@ router.post('/register',validateRegister, register);
  *       401:
  *         description: Email hoặc mật khẩu không đúng
  */
-router.post('/login', login);
+router.post('/login', validateLogin, login);
+
+// OTP verify
+router.post('/verify-otp', validateVerifyOtp, verifyOtp);
+
+// Change password
+router.post('/change-password', validateChangePassword, changePassword);
+
+// Forgot / Reset password
+router.post('/forgot-password', validateForgotPassword, forgotPassword);
+router.post('/reset-password', validateResetPassword, resetPassword);
 
 
 

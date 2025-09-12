@@ -22,4 +22,82 @@ const validateRegister = [
   }
 ];
 
-module.exports = { validateRegister };
+const validateForgotPassword = [
+  body("email")
+    .notEmpty().withMessage("Email bắt buộc")
+    .isEmail().withMessage("Email không hợp lệ"),
+  (req, res, next) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+    next();
+  }
+];
+
+const validateResetPassword = [
+  body("token")
+    .notEmpty().withMessage("Reset token bắt buộc")
+    .isLength({ min: 32 }).withMessage("Reset token không hợp lệ"),
+  body("newPassword")
+    .notEmpty().withMessage("Password mới bắt buộc")
+    .isLength({ min: 6 }).withMessage("Password mới ít nhất 6 ký tự"),
+  (req, res, next) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+    next();
+  }
+];
+
+const validateLogin = [
+  body("email")
+    .notEmpty().withMessage("Email bắt buộc")
+    .isEmail().withMessage("Email không hợp lệ"),
+  body("password")
+    .notEmpty().withMessage("Password bắt buộc"),
+  (req, res, next) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+    next();
+  }
+];
+
+const validateVerifyOtp = [
+  body("email")
+    .notEmpty().withMessage("Email bắt buộc")
+    .isEmail().withMessage("Email không hợp lệ"),
+  body("otp")
+    .notEmpty().withMessage("OTP bắt buộc")
+    .isLength({ min: 4, max: 8 }).withMessage("OTP không hợp lệ"),
+  (req, res, next) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+    next();
+  }
+];
+
+const validateChangePassword = [
+  body("email")
+    .notEmpty().withMessage("Email bắt buộc")
+    .isEmail().withMessage("Email không hợp lệ"),
+  body("currentPassword")
+    .notEmpty().withMessage("Mật khẩu hiện tại bắt buộc"),
+  body("newPassword")
+    .notEmpty().withMessage("Mật khẩu mới bắt buộc")
+    .isLength({ min: 6 }).withMessage("Mật khẩu mới ít nhất 6 ký tự"),
+  (req, res, next) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+    next();
+  }
+];
+
+module.exports = { validateRegister, validateForgotPassword, validateResetPassword, validateLogin, validateVerifyOtp, validateChangePassword };
