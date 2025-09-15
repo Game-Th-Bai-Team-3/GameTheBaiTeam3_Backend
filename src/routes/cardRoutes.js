@@ -1,3 +1,4 @@
+// routes/cards.js
 const express = require('express');
 const router = express.Router();
 const { protect } = require('../middlewares/authMiddleware');
@@ -5,11 +6,12 @@ const upload = require('../middlewares/uploadMiddleware');
 const cardController = require('../controllers/cardController');
 
 const {
-    createCard,
-    getAllCards,
-    getCardById,
-    updateCard,
-    deleteCard
+  createCard,
+  getAllCards,
+  getCardById,
+  updateCard,
+  deleteCard,
+  getCardImageById,
 } = cardController;
 
 /**
@@ -30,30 +32,42 @@ const {
  *           type: string
  *         name:
  *           type: string
- *         description:
+ *         genCore:
+ *           type: number
+ *         origin:
  *           type: string
- *         rarity:
+ *         feature:
  *           type: string
- *           enum: [Common, Uncommon, Rare, Epic, Legendary]
- *         species:
+ *         symbol:
  *           type: string
- *         element:
- *           type: string
- *           enum: [Normal, Fire, Water, Earth, Grass, Electric]
- *         stats:
- *           type: object
- *           properties:
- *             attack:
- *               type: number
- *             hp:
- *               type: number
- *         baseCards:
+ *         power:
+ *           type: number
+ *         defense:
+ *           type: number
+ *         magic:
+ *           type: number
+ *         skill:
+ *           type: array
+ *           items:
+ *             type: object
+ *             properties:
+ *               name:
+ *                 type: string
+ *               description:
+ *                 type: string
+ *           example:
+ *             - name: "Nguyệt Hống"
+ *               description: "Tiếng hú gây choáng diện rộng"
+ *             - name: "Ảnh Ảo Tốc"
+ *               description: "Di chuyển như bóng, né tránh công kích"
+ *         parents:
  *           type: array
  *           items:
  *             type: string
- *         image:
+ *             description: "ObjectId tham chiếu đến Card cha"
+ *         imageUrl:
  *           type: string
- *           description: "Base64 hoặc buffer string ảnh"
+ *           description: "URL lấy ảnh card"
  *         createdAt:
  *           type: string
  *         updatedAt:
@@ -76,34 +90,58 @@ const {
  *             type: object
  *             required:
  *               - name
- *               - element
+ *               - genCore
+ *               - origin
+ *               - feature
+ *               - symbol
+ *               - power
+ *               - defense
+ *               - magic
+ *               - skill
  *             properties:
  *               name:
  *                 type: string
- *                 example: "Fire Dragon"
- *               description:
+ *                 example: "Lupharos – Sói Bóng Đêm"
+ *               genCore:
+ *                 type: number
+ *                 example: 2
+ *               origin:
  *                 type: string
- *                 example: "A mighty dragon born from fire"
- *               rarity:
+ *                 example: " Sinh ra từ bóng tối nguyên thủy trước khi Mặt Trăng xuất hiện, được coi là kẻ dẫn đường cho những kẻ lạc lối trong đêm."
+ *               feature:
  *                 type: string
- *                 enum: [Common, Uncommon, Rare, Epic, Legendary]
- *                 example: "Epic"
- *               species:
+ *                 example: "Bộ lông đen ánh bạc, mắt sáng như sao trời"
+ *               symbol:
  *                 type: string
- *                 example: "Dragon"
- *               element:
- *                 type: string
- *                 enum: [Normal, Fire, Water, Earth, Grass, Electric]
- *                 example: "Fire"
- *               stats[attack]:
- *                 type: integer
- *                 example: 50
- *               stats[hp]:
- *                 type: integer
- *                 example: 200
- *               baseCards:
- *                 type: string
- *                 example: '[]'
+ *                 example: "Tự do – bản năng – sự trung thành"
+ *               power:
+ *                 type: number
+ *                 example: 80
+ *               defense:
+ *                 type: number
+ *                 example: 60
+ *               magic:
+ *                 type: number
+ *                 example: 70
+ *               skill:
+ *                 type: array
+ *                 items:
+ *                   type: object
+ *                   properties:
+ *                     name:
+ *                       type: string
+ *                     description:
+ *                       type: string
+ *                 example:
+ *                   - name: "Nguyệt Hống"
+ *                     description: "Tiếng hú gây choáng diện rộng"
+ *                   - name: "Ảnh Ảo Tốc"
+ *                     description: "Di chuyển như bóng, né tránh công kích"
+ *               parents:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *                 example: []
  *               image:
  *                 type: string
  *                 format: binary
@@ -113,8 +151,6 @@ const {
  *       400:
  *         description: Dữ liệu đầu vào không hợp lệ
  */
-
-
 router.post('/', protect, upload.single('image'), createCard);
 
 /**
@@ -159,8 +195,30 @@ router.get('/', getAllCards);
  */
 router.get('/:id', getCardById);
 
-// Lấy ảnh thẻ theo ID
-router.get('/:id/image', cardController.getCardImageById);
+/**
+ * @swagger
+ * /cards/{id}/image:
+ *   get:
+ *     summary: Lấy ảnh thẻ bài theo ID
+ *     tags: [Cards]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Ảnh thẻ bài
+ *         content:
+ *           image/jpeg:
+ *             schema:
+ *               type: string
+ *               format: binary
+ *       404:
+ *         description: Không tìm thấy ảnh
+ */
+router.get('/:id/image', getCardImageById);
 
 /**
  * @swagger
@@ -176,7 +234,6 @@ router.get('/:id/image', cardController.getCardImageById);
  *         required: true
  *         schema:
  *           type: string
- *         description: ObjectId của thẻ bài cần cập nhật
  *     requestBody:
  *       required: true
  *       content:
@@ -186,27 +243,45 @@ router.get('/:id/image', cardController.getCardImageById);
  *             properties:
  *               name:
  *                 type: string
- *                 example: "Fire Dragon V2"
- *               description:
+ *                 example: "Lupharos – Sói Bóng Đêm_V2"
+ *               genCore:
+ *                 type: number
+ *                 example: 2
+ *               origin:
  *                 type: string
- *                 example: "Evolved version of Fire Dragon"
- *               rarity:
+ *                 default: ""
+ *               feature:
  *                 type: string
- *                 enum: [Common, Uncommon, Rare, Epic, Legendary]
- *                 example: "Legendary"
- *               species:
+ *                 default: ""
+ *               symbol:
  *                 type: string
- *                 example: "Ancient Dragon"
- *               element:
- *                 type: string
- *                 enum: [Normal, Fire, Water, Earth, Grass, Electric]
- *                 example: "Fire"
- *               stats:
- *                 type: string
- *                 example: '{"attack":80,"hp":300}'
- *               baseCards:
- *                 type: string
- *                 example: '[]'
+ *                 default: ""
+ *               power:
+ *                 type: number
+ *                 example: 80
+ *               defense:
+ *                 type: number
+ *                 example: 60
+ *               magic:
+ *                 type: number
+ *                 example: 70
+ *               skill:
+ *                 type: array
+ *                 items:
+ *                   type: object
+ *                   properties:
+ *                     name:
+ *                       type: string
+ *                     description:
+ *                       type: string
+ *                 default: []
+ *                 # Không để example → Swagger UI sẽ show mảng trống
+ *               parents:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *                 default: []
+ *                 # Không để example → Swagger UI sẽ show mảng trống
  *               image:
  *                 type: string
  *                 format: binary
@@ -215,9 +290,8 @@ router.get('/:id/image', cardController.getCardImageById);
  *         description: Thẻ bài đã được cập nhật thành công
  *       404:
  *         description: Không tìm thấy thẻ bài
- *       400:
- *         description: Dữ liệu đầu vào không hợp lệ
  */
+
 router.put('/:id', protect, upload.single('image'), updateCard);
 
 /**
