@@ -159,6 +159,9 @@ router.get('/', getAllCards);
  */
 router.get('/:id', getCardById);
 
+// Lấy ảnh thẻ theo ID
+router.get('/:id/image', cardController.getCardImageById);
+
 /**
  * @swagger
  * /cards/{id}:

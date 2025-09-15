@@ -49,6 +49,11 @@ exports.getAllCards = async () => {
 exports.getCardById = async (id) => {
     return await Card.findById(id);
 };
+//lấy ảnh
+exports.getCardImageById = async (id) => {
+    return await Card.findById(id).select('image');
+};
+
 // Cập nhật thẻ
 exports.updateCard = async (id, data,file) => {
     const card = await Card.findById(id);

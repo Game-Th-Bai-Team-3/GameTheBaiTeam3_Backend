@@ -22,6 +22,21 @@ exports.getAllCards = async (req, res) => {
     res.status(400).json({ error: error.message });
   }
 };
+// Lấy ảnh thẻ theo ID
+exports.getCardImageById = async (req, res) => {
+  try {
+    const card = await cardService.getCardImageById(req.params.id);
+    if (!card || !card.image || !card.image.data) {
+      return res.status(404).json({ error: 'Image not found' });
+    }
+    res.contentType(card.image.contentType);
+    res.send(card.image.data);
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+};
+  
+
 
 exports.getCardById = async (req, res) => {
   try {
