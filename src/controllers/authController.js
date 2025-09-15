@@ -18,6 +18,16 @@ exports.verifyOtp = async (req, res) => {
       res.status(400).json({ error: error.message });
    }
 }
+//gửi lại otp
+exports.resendOtp = async (req, res) => {
+   try{
+      const { email } = req.body;
+      const result = await authService.resendOtp(email);
+      res.status(200).json(result);
+   }catch (error) {
+      res.status(400).json({ error: error.message });
+   }
+}
 
 
 // Đăng nhập

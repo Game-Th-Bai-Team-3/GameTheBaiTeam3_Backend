@@ -1,86 +1,157 @@
-const cardController = require('../controllers/cardController');
+// routes/cards.js
 const express = require('express');
 const router = express.Router();
 const { protect } = require('../middlewares/authMiddleware');
+const upload = require('../middlewares/uploadMiddleware');
+const cardController = require('../controllers/cardController');
 
 const {
-    createCard,
-    getAllCards,
-    getCardById,
-    updateCard,
-    deleteCard
+  createCard,
+  getAllCards,
+  getCardById,
+  updateCard,
+  deleteCard,
+  getCardImageById,
 } = cardController;
 
 /**
  * @swagger
  * tags:
  *   name: Cards
- *   description: API để quản lý thẻ bài 
+ *   description: API quản lý thẻ bài
+ */
+
+/**
+ * @swagger
+ * components:
+ *   schemas:
+ *     Card:
+ *       type: object
+ *       properties:
+ *         _id:
+ *           type: string
+ *         name:
+ *           type: string
+ *         genCore:
+ *           type: number
+ *         origin:
+ *           type: string
+ *         feature:
+ *           type: string
+ *         symbol:
+ *           type: string
+ *         power:
+ *           type: number
+ *         defense:
+ *           type: number
+ *         magic:
+ *           type: number
+ *         skill:
+ *           type: array
+ *           items:
+ *             type: object
+ *             properties:
+ *               name:
+ *                 type: string
+ *               description:
+ *                 type: string
+ *           example:
+ *             - name: "Nguyệt Hống"
+ *               description: "Tiếng hú gây choáng diện rộng"
+ *             - name: "Ảnh Ảo Tốc"
+ *               description: "Di chuyển như bóng, né tránh công kích"
+ *         parents:
+ *           type: array
+ *           items:
+ *             type: string
+ *             description: "ObjectId tham chiếu đến Card cha"
+ *         imageUrl:
+ *           type: string
+ *           description: "URL lấy ảnh card"
+ *         createdAt:
+ *           type: string
+ *         updatedAt:
+ *           type: string
  */
 
 /**
  * @swagger
  * /cards:
  *   post:
- *     summary: Tạo thẻ bài mới  cái BaseCard 1 là để cardID 2 là để trống nếu khhoong là lỗi 
+ *     summary: Tạo thẻ bài mới
  *     tags: [Cards]
  *     security:
  *       - BearerAuth: []
- *     
  *     requestBody:
  *       required: true
  *       content:
- *         application/json:
+ *         multipart/form-data:
  *           schema:
  *             type: object
  *             required:
  *               - name
- *               - element
+ *               - genCore
+ *               - origin
+ *               - feature
+ *               - symbol
+ *               - power
+ *               - defense
+ *               - magic
+ *               - skill
  *             properties:
  *               name:
  *                 type: string
- *                 example: "Fire Dragon"
- *               description:
+ *                 example: "Lupharos – Sói Bóng Đêm"
+ *               genCore:
+ *                 type: number
+ *                 example: 2
+ *               origin:
  *                 type: string
- *                 example: "A mighty dragon born from fire"
- *               rarity:
+ *                 example: " Sinh ra từ bóng tối nguyên thủy trước khi Mặt Trăng xuất hiện, được coi là kẻ dẫn đường cho những kẻ lạc lối trong đêm."
+ *               feature:
  *                 type: string
- *                 enum: [Common, Uncommon, Rare, Epic, Legendary]
- *                 example: "Epic"
- *               species:
+ *                 example: "Bộ lông đen ánh bạc, mắt sáng như sao trời"
+ *               symbol:
  *                 type: string
- *                 example: "Dragon"
- *               element:
- *                 type: string
- *                 enum: [Normal, Fire, Water, Earth, Grass, Electric]
- *                 example: "Fire"
- *               stats:
- *                 type: object
- *                 properties:
- *                   attack:
- *                     type: number
- *                     example: 50
- *                   hp:
- *                     type: number
- *                     example: 200
- *               baseCards:
+ *                 example: "Tự do – bản năng – sự trung thành"
+ *               power:
+ *                 type: number
+ *                 example: 80
+ *               defense:
+ *                 type: number
+ *                 example: 60
+ *               magic:
+ *                 type: number
+ *                 example: 70
+ *               skill:
  *                 type: array
- *                 description: Mảng các ID của thẻ cơ sở có thể để trống (nếu để trống thì xóa cái ""string" đi)
+ *                 items:
+ *                   type: object
+ *                   properties:
+ *                     name:
+ *                       type: string
+ *                     description:
+ *                       type: string
+ *                 example:
+ *                   - name: "Nguyệt Hống"
+ *                     description: "Tiếng hú gây choáng diện rộng"
+ *                   - name: "Ảnh Ảo Tốc"
+ *                     description: "Di chuyển như bóng, né tránh công kích"
+ *               parents:
+ *                 type: array
  *                 items:
  *                   type: string
- *                   example: null
+ *                 example: []
  *               image:
  *                 type: string
- *                 example: "http://example.com/image.png"
+ *                 format: binary
  *     responses:
  *       201:
  *         description: Thẻ bài đã được tạo thành công
  *       400:
  *         description: Dữ liệu đầu vào không hợp lệ
  */
-
-
-router.post('/', protect, createCard);
+router.post('/', protect, upload.single('image'), createCard);
 
 /**
  * @swagger
@@ -96,12 +167,8 @@ router.post('/', protect, createCard);
  *             schema:
  *               type: array
  *               items:
- *                 
- *       400:
- *         description: Lỗi khi lấy dữ liệu
+ *                 $ref: '#/components/schemas/Card'
  */
-
-
 router.get('/', getAllCards);
 
 /**
@@ -116,22 +183,42 @@ router.get('/', getAllCards);
  *         required: true
  *         schema:
  *           type: string
- *         description: ObjectId của thẻ bài cần lấy
  *     responses:
  *       200:
  *         description: Thông tin thẻ bài
  *         content:
  *           application/json:
  *             schema:
- *               
+ *               $ref: '#/components/schemas/Card'
  *       404:
  *         description: Không tìm thấy thẻ bài
- *       400:
- *         description: Lỗi dữ liệu đầu vào
  */
-
-
 router.get('/:id', getCardById);
+
+/**
+ * @swagger
+ * /cards/{id}/image:
+ *   get:
+ *     summary: Lấy ảnh thẻ bài theo ID
+ *     tags: [Cards]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Ảnh thẻ bài
+ *         content:
+ *           image/jpeg:
+ *             schema:
+ *               type: string
+ *               format: binary
+ *       404:
+ *         description: Không tìm thấy ảnh
+ */
+router.get('/:id/image', getCardImageById);
 
 /**
  * @swagger
@@ -139,50 +226,73 @@ router.get('/:id', getCardById);
  *   put:
  *     summary: Cập nhật thẻ bài theo ID
  *     tags: [Cards]
+ *     security:
+ *       - BearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
  *         required: true
  *         schema:
  *           type: string
- *         description: ObjectId của thẻ bài cần cập nhật
  *     requestBody:
  *       required: true
  *       content:
- *         application/json:
+ *         multipart/form-data:
  *           schema:
  *             type: object
- *             example:
- *               name: "Fire Dragon Updated"
- *               description: "A stronger fire dragon"
- *               rarity: "Epic"
- *               species: "Dragon"
- *               element: "Fire"
- *               stats:
- *                 attack: 60
- *                 hp: 250
- *               baseCards: []
- *               image: "http://example.com/fire_dragon_updated.png"
+ *             properties:
+ *               name:
+ *                 type: string
+ *                 example: "Lupharos – Sói Bóng Đêm_V2"
+ *               genCore:
+ *                 type: number
+ *                 example: 2
+ *               origin:
+ *                 type: string
+ *                 default: ""
+ *               feature:
+ *                 type: string
+ *                 default: ""
+ *               symbol:
+ *                 type: string
+ *                 default: ""
+ *               power:
+ *                 type: number
+ *                 example: 80
+ *               defense:
+ *                 type: number
+ *                 example: 60
+ *               magic:
+ *                 type: number
+ *                 example: 70
+ *               skill:
+ *                 type: array
+ *                 items:
+ *                   type: object
+ *                   properties:
+ *                     name:
+ *                       type: string
+ *                     description:
+ *                       type: string
+ *                 default: []
+ *                 # Không để example → Swagger UI sẽ show mảng trống
+ *               parents:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *                 default: []
+ *                 # Không để example → Swagger UI sẽ show mảng trống
+ *               image:
+ *                 type: string
+ *                 format: binary
  *     responses:
  *       200:
  *         description: Thẻ bài đã được cập nhật thành công
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *                   example: "Thẻ bài đã được cập nhật thành công"
- *                 card:
- *                   
  *       404:
  *         description: Không tìm thấy thẻ bài
- *       400:
- *         description: Dữ liệu đầu vào không hợp lệ
  */
 
-router.put('/:id', protect, updateCard);
+router.put('/:id', protect, upload.single('image'), updateCard);
 
 /**
  * @swagger
@@ -190,28 +300,19 @@ router.put('/:id', protect, updateCard);
  *   delete:
  *     summary: Xóa thẻ bài theo ID
  *     tags: [Cards]
+ *     security:
+ *       - BearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
  *         required: true
  *         schema:
  *           type: string
- *         description: ObjectId của thẻ bài cần xóa
  *     responses:
  *       200:
  *         description: Thẻ bài đã được xóa thành công
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *                   example: "Thẻ bài đã được xóa thành công"
  *       404:
  *         description: Không tìm thấy thẻ bài
- *       400:
- *         description: Lỗi dữ liệu đầu vào
  */
 router.delete('/:id', protect, deleteCard);
 

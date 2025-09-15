@@ -1,6 +1,6 @@
 const express = require('express');
 
-const {register, login, verifyOtp, forgotPassword, 
+const {register, login, verifyOtp, resendOtp , forgotPassword, 
     resetPassword, changePassword } = require('../controllers/authController');
 
 
@@ -89,6 +89,52 @@ router.post('/register',validateRegister, register);
  *         description: OTP không hợp lệ hoặc đã hết hạn
  */
 router.post('/verify-otp', verifyOtp);
+
+/**
+ * @swagger
+ * /auth/resend-otp:
+ *   post:
+ *     summary: Gửi lại OTP cho tài khoản chưa xác thực
+ *     tags:
+ *       - Auth
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - email
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 format: email
+ *                 example: johndoe@example.com
+ *                 description: Email của tài khoản cần gửi lại OTP
+ *     responses:
+ *       200:
+ *         description: OTP mới đã được gửi thành công
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: OTP mới đã được gửi thành công. Vui lòng kiểm tra email của bạn.
+ *       400:
+ *         description: Email không tồn tại hoặc tài khoản đã được xác thực
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: Tài khoản đã được xác thực. Bạn đã có thể đăng nhập.
+ */
+router.post('/resend-otp', resendOtp);
+
 
 
 /**

@@ -78,6 +78,42 @@ exports.verifyOtp = async ({email, otp}) => {
         
 };
 
+//gửi lại OTP
+exports.resendOtp = async (email) => {
+    //kiểm tra email có tồn tại không và chưa xác thực
+    const user = await User.findOne({ email });
+    if (!user) {
+        throw new Error("Email không tồn tại");
+    }
+    if(user.isVerified){
+        throw new Error("Tài khoản đã được xác thực. Bạn đã có thể đăng nhập.");
+    }
+    // xóa OTP cũ nếu có
+    await OTP.deleteMany({ email });
+    // Tạo OTP mới
+    const otp = otpGenerator.generate(6, {
+        upperCaseAlphabets: false,
+        specialChars: false,
+        lowerCaseAlphabets: false
+    });
+    // Hash OTP và lưu vào DB
+    const hashedOtp = await hashPassword(otp);
+    await OTP.create({
+        email,
+        otp: hashedOtp,
+        expiresAt: Date.now() + 10 * 60 * 1000 // 10 phút
+    });
+    // Thử gửi OTP qua email
+    try {
+        await sendOtp(email, otp);
+        return { message: "OTP mới đã được gửi thành công. Vui lòng kiểm tra email của bạn." };
+    } catch (err) {
+        // Nếu gửi thất bại thì xóa OTP
+        await OTP.deleteMany({ email });
+        throw new Error("Không thể gửi OTP. Vui lòng thử lại sau.");
+    }
+}
+
 // Đăng nhập
 exports.login = async ({email, password}) => {
     //kiem tra email
