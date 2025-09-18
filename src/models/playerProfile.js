@@ -9,7 +9,7 @@ const playerProfileSchema = new mongoose.Schema({
         unique: true
     },
     
-    currency: [{
+    currency: {
         gold: {
             type: Number,
             default: 0
@@ -18,7 +18,7 @@ const playerProfileSchema = new mongoose.Schema({
             type: Number,
             default: 0
         },
-    }],
+    },
 
     cards: [{
         card: {
