@@ -1,11 +1,12 @@
 const User = require("../models/userModel.js");
 const OTP = require("../models/otp.js");
-const { generateToken } = require("../utils/jwtToken");
+const { generateTokenPair  } = require("../utils/jwtToken");
 const { comparePassword, hashPassword } = require("../utils/bcrypt");
 const { sendResetPasswordEmail } = require("./emailService");
 const crypto = require("crypto");
 const otpGenerator = require('otp-generator');
 const  sendOtp  = require("../utils/sendOtp");
+const jwt = require("jsonwebtoken");
 
 
 // Đăng ký người dùng mới
@@ -125,13 +126,52 @@ exports.login = async ({email, password}) => {
     if (!user.isVerified) {
         throw new Error("Tài khoản chưa được xác thực. Vui lòng kiểm tra email để xác thực OTP.");
     }
-
+    //kiem tra password
     const isMatch = await comparePassword(password, user.password);
     if (!isMatch) {
         throw new Error("Mật khẩu không đúng");
     }
-    const token = generateToken(user._id, user.role);
-    return { message: "Đăng nhập thành công", token, user: { id: user._id, username: user.username, email: user.email, role: user.role } };
+    // Tạo cặp access & refresh token
+    const { accessToken, refreshToken } = generateTokenPair(user);
+    //lưu refreshToken vào db
+    user.refreshToken = refreshToken;
+    await user.save();
+    // Trả về token và thông tin người dùng (không bao gồm mật khẩu)
+    return { message: "Đăng nhập thành công", 
+        accessToken,
+        refreshToken,
+         user: { id: user._id,
+             username: user.username,
+              email: user.email, 
+              role: user.role }, };
+};
+// refresh token
+exports.refreshToken = async (refreshToken) => {
+    //kiem tra refreshToken
+    if(!refreshToken){
+        throw new Error("Refresh token không hợp lệ");
+    }
+    //tim user có token này trong db
+    const user = await User.findOne({ refreshToken });
+    if (!user) {
+        throw new Error("Refresh token không hợp lệ");
+    }
+    // verify token
+    try{
+        const decoded = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET);
+        //tao cặp token mới
+        const { accessToken, refreshToken: newRefreshToken } = generateTokenPair(user);
+        //lưu refreshToken mới vào db
+        user.refreshToken = newRefreshToken;
+        await user.save();
+        //trả về token mới
+        return {
+            accessToken,
+            refreshToken: newRefreshToken
+        };
+    }catch(err){
+        throw new Error("Refresh token không hợp lệ hoặc đã hết hạn");
+    }
 };
 
 // Cập nhật mật khẩu bằng mật khẩu hiện tại

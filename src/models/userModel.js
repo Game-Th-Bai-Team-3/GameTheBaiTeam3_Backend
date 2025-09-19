@@ -10,6 +10,7 @@ const userSchema = new mongoose.Schema({
     isVerified: { type: Boolean, default: false },
     resetToken: { type: String },
     resetTokenExpiry: { type: Date },
+    refreshToken: { type: String },
 
 }, { timestamps: true });
 

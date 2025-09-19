@@ -1,7 +1,7 @@
 // routes/cards.js
 const express = require('express');
 const router = express.Router();
-const { protect } = require('../middlewares/authMiddleware');
+const { protect,authorizeRoles } = require('../middlewares/authMiddleware');
 const upload = require('../middlewares/uploadMiddleware');
 const cardController = require('../controllers/cardController');
 
@@ -151,7 +151,7 @@ const {
  *       400:
  *         description: Dữ liệu đầu vào không hợp lệ
  */
-router.post('/', protect, upload.single('image'), createCard);
+router.post('/', protect,authorizeRoles('admin'), upload.single('image'), createCard);
 
 /**
  * @swagger
@@ -292,7 +292,7 @@ router.get('/:id/image', getCardImageById);
  *         description: Không tìm thấy thẻ bài
  */
 
-router.put('/:id', protect, upload.single('image'), updateCard);
+router.put('/:id', protect,authorizeRoles('admin'), upload.single('image'), updateCard);
 
 /**
  * @swagger
@@ -314,6 +314,6 @@ router.put('/:id', protect, upload.single('image'), updateCard);
  *       404:
  *         description: Không tìm thấy thẻ bài
  */
-router.delete('/:id', protect, deleteCard);
+router.delete('/:id', protect,authorizeRoles('admin'), deleteCard);
 
 module.exports = router;

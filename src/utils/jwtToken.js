@@ -1,9 +1,19 @@
-const jwt = require('jsonwebtoken');
+const jwt = require("jsonwebtoken");
 
-const generateToken = (id, role) => {
-  return jwt.sign({ id, role }, process.env.JWT_SECRET, { expiresIn: '1d' });
-}
+const generateTokenPair = (user) => {
+  const payload = { id: user._id, role: user.role };
 
-module.exports = {
-  generateToken
+  // Access token: ngắn hạn
+  const accessToken = jwt.sign(payload, process.env.JWT_SECRET, {
+    expiresIn: "15m",
+  });
+
+  // Refresh token: dài hạn
+  const refreshToken = jwt.sign(payload, process.env.JWT_REFRESH_SECRET, {
+    expiresIn: "7h",
+  });
+
+  return { accessToken, refreshToken };
 };
+
+module.exports = { generateTokenPair };

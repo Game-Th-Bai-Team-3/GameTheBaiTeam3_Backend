@@ -39,6 +39,16 @@ exports.login = async (req, res) => {
       res.status(400).json({ error: error.message });
    } 
 };
+// refresh token
+exports.refreshToken = async (req, res) => {
+   try{
+      const { refreshToken } = req.body;
+      const result = await authService.refreshToken(refreshToken);
+      res.json(result);
+   }catch (error) {
+      res.status(400).json({ error: error.message });
+   }
+}
 
 // Thay đổi mật khẩu bằng mật khẩu hiện tại
 exports.changePassword = async (req, res) => {
