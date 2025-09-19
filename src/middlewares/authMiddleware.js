@@ -10,10 +10,10 @@ const protect = (req, res, next) => {
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    req.user = decoded;
+    req.user = decoded; // Gắn thông tin user vào request
     next();
-  } catch {
-    return res.status(401).json({ message: "Token không hợp lệ" });
+  } catch (error) {
+    return res.status(401).json({ message: "Token không hợp lệ hoặc đã hết hạn" });
   }
 };
 
@@ -27,6 +27,6 @@ const authorizeRoles = (...roles) => {
     }
     next();
   };
-}
+};
 
 module.exports = { protect, authorizeRoles };

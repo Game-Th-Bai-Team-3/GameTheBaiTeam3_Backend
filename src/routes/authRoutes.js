@@ -1,7 +1,7 @@
 const express = require('express');
 
 const {register, login, verifyOtp, resendOtp , forgotPassword, 
-    resetPassword, changePassword } = require('../controllers/authController');
+    resetPassword, changePassword,refreshToken } = require('../controllers/authController');
 
 
 const {authMiddleware, authorizeRoles} = require('../middlewares/authMiddleware');
@@ -178,6 +178,44 @@ router.post('/resend-otp', resendOtp);
  */
 router.post('/login', login);
 
+/**
+ * @swagger
+ * /auth/refresh-token:
+ *   post:
+ *     summary: Lấy access token mới bằng refresh token
+ *     tags:
+ *       - Auth
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - refreshToken
+ *             properties:
+ *               refreshToken:
+ *                 type: string
+ *                 example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+ *     responses:
+ *       200:
+ *         description: Trả về access token mới và refresh token mới
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 accessToken:
+ *                   type: string
+ *                   example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+ *                 refreshToken:
+ *                   type: string
+ *                   example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+ *       401:
+ *         description: Refresh token không hợp lệ hoặc đã hết hạn
+ */
+
+router.post('/refresh-token', refreshToken);
 /**
  * @swagger
  * /auth/change-password:
