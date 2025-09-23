@@ -173,7 +173,7 @@ router.post('/', protect, authorizeRoles('admin'), upload.single('image'), creat
  *     requestBody:
  *       required: true
  *       content:
- *         application/json:
+ *         multipart/form-data:
  *           schema:
  *             type: object
  *             required:
@@ -185,11 +185,33 @@ router.post('/', protect, authorizeRoles('admin'), upload.single('image'), creat
  *     responses:
  *       201:
  *         description: Thẻ bài đã được tạo thành công từ ảnh
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                 card:
+ *                   type: object
+ *                   properties:
+ *                     _id:
+ *                       type: string
+ *                     name:
+ *                       type: string
+ *                     imageUrl:
+ *                       type: string
  *       400:
  *         description: Dữ liệu đầu vào không hợp lệ
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
  */
-router.post('/from-url', protect, authorizeRoles('admin'), createCardFromImageOnly);
-
+router.post('/image-only', upload.single('image'), createCardFromImageOnly);
 /**
  * @swagger
  * /cards:
