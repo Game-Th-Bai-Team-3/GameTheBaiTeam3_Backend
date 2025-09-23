@@ -99,7 +99,13 @@ exports.deleteCard = async (id) => {
   return await Card.findByIdAndDelete(id);
 };
 
-exports.createCardFromImageUrl = async (imageUrl) => {
+exports.createCardFromImageOnly = async (file) => {
+  let imageUrl = null;
+  if (file) {
+    // Upload ảnh lên Cloudinary
+     imageUrl = await uploadImage(file.buffer, "GameTheBaiG3");
+  }
+  
   const placeholderCardData = {
     name: `Placeholder Card - ${Date.now()}`,
     genCore: 1,

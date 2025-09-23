@@ -3,15 +3,15 @@ const { formatCard } = require('../helpers/cardFormatter');
 const cardService = require('../services/cardService');
 const { emitToAllFE } = require('../utils/socketHandler');
 
-exports.createCardWithImageUrl = async (req, res) => {
+exports.createCardFromImageOnly = async (req, res) => {
   try {
-    const { imageUrl } = req.body;
-    if (!imageUrl) {
-      return res.status(400).json({ error: 'Image URL is required' });
+    const file = req.file;
+    if (!file) {
+      return res.status(400).json({ error: 'Image file is required' });
     }
-    const card = await cardService.createCardFromImageUrl(imageUrl);
+    const card = await cardService.createCardFromFile(file);
     res.status(201).json({
-      message: 'Thẻ bài đã được tạo thành công từ URL ảnh',
+      message: 'Thẻ bài đã được tạo thành công từ ảnh',
       card,
     });
   } catch (error) {
@@ -96,3 +96,4 @@ exports.deleteCard = async (req, res) => {
     res.status(400).json({ error: error.message });
   }
 };
+

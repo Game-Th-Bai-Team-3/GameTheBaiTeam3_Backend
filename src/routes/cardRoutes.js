@@ -12,7 +12,7 @@ const {
   updateCard,
   deleteCard,
   getCardImageById,
-  createCardWithImageUrl,
+  createCardFromImageOnly,
 } = cardController;
 
 /**
@@ -164,9 +164,9 @@ router.post('/', protect, authorizeRoles('admin'), upload.single('image'), creat
 
 /**
  * @swagger
- * /cards/from-url:
+ * /cards/image-only:
  *   post:
- *     summary: Tạo thẻ bài mới từ URL ảnh
+ *     summary: Tạo thẻ bài mới từ ảnh
  *     tags: [Cards]
  *     security:
  *       - BearerAuth: []
@@ -177,18 +177,18 @@ router.post('/', protect, authorizeRoles('admin'), upload.single('image'), creat
  *           schema:
  *             type: object
  *             required:
- *               - imageUrl
+ *               - image
  *             properties:
- *               imageUrl:
+ *               image:
  *                 type: string
- *                 example: "https://example.com/image.jpg"
+ *                 format: binary
  *     responses:
  *       201:
- *         description: Thẻ bài đã được tạo thành công từ URL ảnh
+ *         description: Thẻ bài đã được tạo thành công từ ảnh
  *       400:
  *         description: Dữ liệu đầu vào không hợp lệ
  */
-router.post('/from-url', protect, authorizeRoles('admin'), createCardWithImageUrl);
+router.post('/from-url', protect, authorizeRoles('admin'), createCardFromImageOnly);
 
 /**
  * @swagger
