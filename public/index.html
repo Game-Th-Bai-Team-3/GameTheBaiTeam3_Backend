@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Game Thẻ Bài - AI Image Processing Demo</title>
+    <script src="/socket.io/socket.io.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            color: white;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+
+        .demo-container {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+
+        .upload-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+
+        .upload-box {
+            border: 3px dashed #ddd;
+            border-radius: 15px;
+            padding: 40px 20px;
+            text-align: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            min-height: 250px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .upload-box:hover {
+            border-color: #667eea;
+            background-color: #f8f9ff;
+        }
+
+        .upload-box.dragover {
+            border-color: #667eea;
+            background-color: #f0f4ff;
+        }
+
+        .upload-icon {
+            font-size: 3rem;
+            color: #ccc;
+            margin-bottom: 15px;
+        }
+
+        .upload-text {
+            font-size: 1.1rem;
+            color: #666;
+            margin-bottom: 15px;
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        .preview-img {
+            max-width: 100%;
+            max-height: 200px;
+            border-radius: 10px;
+            margin-top: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .process-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            font-size: 1.2rem;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: block;
+            margin: 0 auto;
+            min-width: 200px;
+        }
+
+        .process-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .process-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .status-section {
+            margin-top: 40px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 15px;
+            min-height: 100px;
+        }
+
+        .status-title {
+            font-size: 1.3rem;
+            margin-bottom: 15px;
+            color: #333;
+        }
+
+        .status-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+            padding: 10px;
+            background: white;
+            border-radius: 8px;
+            border-left: 4px solid #ddd;
+        }
+
+        .status-item.processing {
+            border-left-color: #ffc107;
+        }
+
+        .status-item.success {
+            border-left-color: #28a745;
+        }
+
+        .status-item.error {
+            border-left-color: #dc3545;
+        }
+
+        .status-icon {
+            margin-right: 10px;
+            font-size: 1.2rem;
+        }
+
+        .result-section {
+            margin-top: 40px;
+            text-align: center;
+        }
+
+        .result-img {
+            max-width: 100%;
+            max-height: 400px;
+            border-radius: 15px;
+            box-shadow: 0 15px 30px rgba(0,0,0,0.2);
+            margin-top: 20px;
+        }
+
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .connection-status {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 10px 20px;
+            border-radius: 25px;
+            color: white;
+            font-weight: bold;
+            z-index: 1000;
+        }
+
+        .connection-status.connected {
+            background: #28a745;
+        }
+
+        .connection-status.disconnected {
+            background: #dc3545;
+        }
+
+        @media (max-width: 768px) {
+            .upload-section {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .demo-container {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="connection-status" id="connectionStatus">
+        <span class="loading"></span> Đang kết nối...
+    </div>
+
+    <div class="container">
+        <div class="header">
+            <h1>🎮 Game Thẻ Bài - AI Demo</h1>
+            <p>Upload 2 ảnh để AI xử lý và tạo ra ảnh mới</p>
+        </div>
+
+        <div class="demo-container">
+            <div class="upload-section">
+                <div class="upload-box" onclick="document.getElementById('image1').click()">
+                    <div class="upload-icon">🖼️</div>
+                    <div class="upload-text">Click để chọn ảnh thứ nhất</div>
+                    <input type="file" id="image1" class="file-input" accept="image/*">
+                    <div id="preview1"></div>
+                </div>
+
+                <div class="upload-box" onclick="document.getElementById('image2').click()">
+                    <div class="upload-icon">🖼️</div>
+                    <div class="upload-text">Click để chọn ảnh thứ hai</div>
+                    <input type="file" id="image2" class="file-input" accept="image/*">
+                    <div id="preview2"></div>
+                </div>
+            </div>
+
+            <button class="process-btn" id="processBtn" onclick="processImages()" disabled>
+                🚀 Xử lý với AI
+            </button>
+
+            <div class="status-section">
+                <div class="status-title">📋 Trạng thái xử lý:</div>
+                <div id="statusContainer">
+                    <div class="status-item">
+                        <span class="status-icon">⏳</span>
+                        <span>Chọn 2 ảnh để bắt đầu...</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="result-section" id="resultSection" style="display: none;">
+                <h3>🎯 Kết quả từ AI:</h3>
+                <img id="resultImage" class="result-img">
+                <br><br>
+                <button class="process-btn" onclick="resetDemo()" style="background: #6c757d;">
+                    🔄 Thử lại
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Socket.IO connection
+        const socket = io();
+        let currentSessionId = null;
+        let selectedFiles = { image1: null, image2: null };
+
+        // Connection status
+        const connectionStatus = document.getElementById('connectionStatus');
+        
+        socket.on('connect', () => {
+            connectionStatus.textContent = '✅ Đã kết nối';
+            connectionStatus.className = 'connection-status connected';
+            addStatusItem('✅ Kết nối Socket.IO thành công', 'success');
+        });
+
+        socket.on('disconnect', () => {
+            connectionStatus.textContent = '❌ Mất kết nối';
+            connectionStatus.className = 'connection-status disconnected';
+            addStatusItem('❌ Mất kết nối Socket.IO', 'error');
+        });
+
+        // File selection handlers
+        document.getElementById('image1').addEventListener('change', (e) => handleFileSelect(e, 'image1', 'preview1'));
+        document.getElementById('image2').addEventListener('change', (e) => handleFileSelect(e, 'image2', 'preview2'));
+
+        function handleFileSelect(event, inputId, previewId) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            selectedFiles[inputId] = file;
+            
+            // Preview image
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                document.getElementById(previewId).innerHTML = 
+                    `<img src="${e.target.result}" class="preview-img" alt="Preview">`;
+            };
+            reader.readAsDataURL(file);
+
+            checkCanProcess();
+        }
+
+        function checkCanProcess() {
+            const canProcess = selectedFiles.image1 && selectedFiles.image2;
+            document.getElementById('processBtn').disabled = !canProcess;
+            
+            if (canProcess) {
+                addStatusItem('✅ Đã chọn đủ 2 ảnh, sẵn sàng xử lý!', 'success');
+            }
+        }
+
+        async function processImages() {
+            if (!selectedFiles.image1 || !selectedFiles.image2) return;
+
+            const processBtn = document.getElementById('processBtn');
+            processBtn.disabled = true;
+            processBtn.innerHTML = '<span class="loading"></span> Đang xử lý...';
+
+            const formData = new FormData();
+            formData.append('image1', selectedFiles.image1);
+            formData.append('image2', selectedFiles.image2);
+
+            try {
+                addStatusItem('📤 Đang upload ảnh lên server...', 'processing');
+                
+                const response = await fetch('/api/images/process', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const result = await response.json();
+                
+                if (result.success) {
+                    currentSessionId = result.data.sessionId;
+                    addStatusItem('✅ Upload thành công! Session ID: ' + currentSessionId, 'success');
+                    addStatusItem('🤖 Đang gửi tới AI để xử lý...', 'processing');
+                    
+                    // Listen for AI processing complete
+                    listenForAIResult();
+                } else {
+                    throw new Error(result.message);
+                }
+            } catch (error) {
+                addStatusItem('❌ Lỗi: ' + error.message, 'error');
+                processBtn.disabled = false;
+                processBtn.innerHTML = '🚀 Xử lý với AI';
+            }
+        }
+
+        function listenForAIResult() {
+            // Listen for AI processing complete
+            socket.on('ai_process_complete', (data) => {
+                if (data.sessionId === currentSessionId) {
+                    addStatusItem('🎉 AI xử lý hoàn thành!', 'success');
+                    showResult(data.resultImageUrl);
+                }
+            });
+
+            // Listen for AI processing error
+            socket.on('ai_process_error', (data) => {
+                if (data.sessionId === currentSessionId) {
+                    addStatusItem('❌ Lỗi AI: ' + data.message, 'error');
+                    resetProcessButton();
+                }
+            });
+
+            // Simulate AI processing (for demo purposes)
+            setTimeout(() => {
+                addStatusItem('⚠️ Đây là demo - AI service chưa kết nối', 'error');
+                addStatusItem('💡 Kết quả mẫu sẽ hiển thị sau 2 giây...', 'processing');
+                
+                setTimeout(() => {
+                    // Simulate result
+                    showResult('https://picsum.photos/400/300?random=' + Date.now());
+                    addStatusItem('✨ Hiển thị kết quả mẫu (demo)', 'success');
+                }, 2000);
+            }, 3000);
+        }
+
+        function showResult(imageUrl) {
+            document.getElementById('resultImage').src = imageUrl;
+            document.getElementById('resultSection').style.display = 'block';
+            resetProcessButton();
+        }
+
+        function resetProcessButton() {
+            const processBtn = document.getElementById('processBtn');
+            processBtn.disabled = false;
+            processBtn.innerHTML = '🚀 Xử lý với AI';
+        }
+
+        function addStatusItem(message, type = '') {
+            const container = document.getElementById('statusContainer');
+            const statusItem = document.createElement('div');
+            statusItem.className = `status-item ${type}`;
+            
+            const icon = type === 'success' ? '✅' : type === 'error' ? '❌' : type === 'processing' ? '⏳' : 'ℹ️';
+            statusItem.innerHTML = `
+                <span class="status-icon">${icon}</span>
+                <span>${message}</span>
+            `;
+            
+            container.appendChild(statusItem);
+            statusItem.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+
+        function resetDemo() {
+            selectedFiles = { image1: null, image2: null };
+            currentSessionId = null;
+            
+            document.getElementById('image1').value = '';
+            document.getElementById('image2').value = '';
+            document.getElementById('preview1').innerHTML = '';
+            document.getElementById('preview2').innerHTML = '';
+            document.getElementById('resultSection').style.display = 'none';
+            document.getElementById('statusContainer').innerHTML = `
+                <div class="status-item">
+                    <span class="status-icon">⏳</span>
+                    <span>Chọn 2 ảnh để bắt đầu...</span>
+                </div>
+            `;
+            
+            checkCanProcess();
+        }
+
+        // Drag and drop support
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+            document.querySelectorAll('.upload-box').forEach(box => {
+                box.addEventListener(eventName, preventDefaults, false);
+            });
+        });
+
+        function preventDefaults(e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+
+        document.querySelectorAll('.upload-box').forEach((box, index) => {
+            ['dragenter', 'dragover'].forEach(eventName => {
+                box.addEventListener(eventName, () => box.classList.add('dragover'));
+            });
+
+            ['dragleave', 'drop'].forEach(eventName => {
+                box.addEventListener(eventName, () => box.classList.remove('dragover'));
+            });
+
+            box.addEventListener('drop', (e) => {
+                const files = e.dataTransfer.files;
+                if (files.length > 0) {
+                    const inputId = index === 0 ? 'image1' : 'image2';
+                    const previewId = index === 0 ? 'preview1' : 'preview2';
+                    document.getElementById(inputId).files = files;
+                    handleFileSelect({ target: { files } }, inputId, previewId);
+                }
+            });
+        });
+    </script>
+</body>
+</html> 

@@ -7,6 +7,9 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+// Serve static files cho frontend demo
+app.use(express.static('public'));
+
 // Swagger
 const { swaggerUi, swaggerSpec } = require('./utils/swagger');
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
