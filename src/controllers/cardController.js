@@ -30,8 +30,10 @@ exports.getCardImageById = async (req, res) => {
     if (!imageUrl) {
       return res.status(404).json({ error: 'Card or image not found' });
     }
+    console.log("📤 Emitting newCard to FE", imageUrl);
+emitToAllFE("newCard", { cardId: req.params.id, img: imageUrl });
     // emit cho tất cả FE khi có ai đó lấy ảnh thẻ
-    emitToAllFE("newCard", { cardId: req.params.id, imageUrl });
+    
    res.json({ imageUrl });
   }catch (error) {
     res.status(400).json({ error: error.message });
