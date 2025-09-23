@@ -69,16 +69,7 @@ exports.updateCard = async (id, data, file) => {
     throw new Error("Không tìm thấy thẻ");
   }
 
-  card.name = data.name || card.name;
-  card.genCore = data.genCore ?? card.genCore;
-
-  card.origin = data.origin || card.origin;
-  card.feature = data.feature || card.feature;
-  card.symbol = data.symbol || card.symbol;
-
-  card.power = data.power ?? card.power;
-  card.defense = data.defense ?? card.defense;
-  card.magic = data.magic ?? card.magic;
+  Object.assign(card, data);
 
   // Chuẩn hóa skill khi update
   if (data.skill) {
