@@ -9,7 +9,9 @@ exports.createCardFromImageOnly = async (req, res) => {
     if (!file) {
       return res.status(400).json({ error: 'Image file is required' });
     }
-    const card = await cardService.createCardFromFile(file);
+    const card = await cardService.createCardFromImageOnly(file);
+    // emit cho tất cả FE khi có ai đó tạo thẻ mới
+    emitToAllFE("newCard", { cardId: card._id, img: card.imageUrl });
     res.status(201).json({
       message: 'Thẻ bài đã được tạo thành công từ ảnh',
       card,
