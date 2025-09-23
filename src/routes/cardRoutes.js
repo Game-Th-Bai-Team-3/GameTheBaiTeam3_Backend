@@ -1,7 +1,7 @@
 // routes/cards.js
 const express = require('express');
 const router = express.Router();
-const { protect,authorizeRoles } = require('../middlewares/authMiddleware');
+const { protect, authorizeRoles } = require('../middlewares/authMiddleware');
 const upload = require('../middlewares/uploadMiddleware');
 const cardController = require('../controllers/cardController');
 
@@ -32,20 +32,28 @@ const {
  *           type: string
  *         name:
  *           type: string
+ *           example: "Lupharos – Sói Bóng Đêm"
  *         genCore:
  *           type: number
+ *           example: 2
  *         origin:
  *           type: string
+ *           example: "Sinh ra từ bóng tối nguyên thủy trước khi Mặt Trăng xuất hiện, được coi là kẻ dẫn đường cho những kẻ lạc lối trong đêm."
  *         feature:
  *           type: string
+ *           example: "Bộ lông đen ánh bạc, mắt sáng như sao trời"
  *         symbol:
  *           type: string
+ *           example: "Tự do – bản năng – sự trung thành"
  *         power:
  *           type: number
+ *           example: 80
  *         defense:
  *           type: number
+ *           example: 60
  *         magic:
  *           type: number
+ *           example: 70
  *         skill:
  *           type: array
  *           items:
@@ -64,10 +72,10 @@ const {
  *           type: array
  *           items:
  *             type: string
- *             description: "ObjectId tham chiếu đến Card cha"
+ *           example: []
  *         imageUrl:
  *           type: string
- *           description: "URL lấy ảnh card"
+ *           example: "https://res.cloudinary.com/.../image.jpg"
  *         createdAt:
  *           type: string
  *         updatedAt:
@@ -107,7 +115,7 @@ const {
  *                 example: 2
  *               origin:
  *                 type: string
- *                 example: " Sinh ra từ bóng tối nguyên thủy trước khi Mặt Trăng xuất hiện, được coi là kẻ dẫn đường cho những kẻ lạc lối trong đêm."
+ *                 example: "Sinh ra từ bóng tối nguyên thủy trước khi Mặt Trăng xuất hiện..."
  *               feature:
  *                 type: string
  *                 example: "Bộ lông đen ánh bạc, mắt sáng như sao trời"
@@ -151,7 +159,7 @@ const {
  *       400:
  *         description: Dữ liệu đầu vào không hợp lệ
  */
-router.post('/', protect,authorizeRoles('admin'), upload.single('image'), createCard);
+router.post('/', protect, authorizeRoles('admin'), upload.single('image'), createCard);
 
 /**
  * @swagger
@@ -209,12 +217,14 @@ router.get('/:id', getCardById);
  *           type: string
  *     responses:
  *       200:
- *         description: Ảnh thẻ bài
+ *         description: URL ảnh thẻ bài
  *         content:
- *           image/jpeg:
+ *           application/json:
  *             schema:
- *               type: string
- *               format: binary
+ *               type: object
+ *               properties:
+ *                 imageUrl:
+ *                   type: string
  *       404:
  *         description: Không tìm thấy ảnh
  */
@@ -275,13 +285,11 @@ router.get('/:id/image', getCardImageById);
  *                     description:
  *                       type: string
  *                 default: []
- *                 # Không để example → Swagger UI sẽ show mảng trống
  *               parents:
  *                 type: array
  *                 items:
  *                   type: string
  *                 default: []
- *                 # Không để example → Swagger UI sẽ show mảng trống
  *               image:
  *                 type: string
  *                 format: binary
@@ -291,8 +299,7 @@ router.get('/:id/image', getCardImageById);
  *       404:
  *         description: Không tìm thấy thẻ bài
  */
-
-router.put('/:id', protect,authorizeRoles('admin'), upload.single('image'), updateCard);
+router.put('/:id', protect, authorizeRoles('admin'), upload.single('image'), updateCard);
 
 /**
  * @swagger
@@ -314,6 +321,6 @@ router.put('/:id', protect,authorizeRoles('admin'), upload.single('image'), upda
  *       404:
  *         description: Không tìm thấy thẻ bài
  */
-router.delete('/:id', protect,authorizeRoles('admin'), deleteCard);
+router.delete('/:id', protect, authorizeRoles('admin'), deleteCard);
 
 module.exports = router;

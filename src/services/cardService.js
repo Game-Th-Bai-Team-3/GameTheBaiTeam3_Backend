@@ -1,5 +1,5 @@
 const Card = require('../models/cards');
-const { resizeImage } = require('./imageService');
+const { uploadImage  } = require('./imageService');
 
 // Tạo thẻ mới
 exports.createCard = async (data, file) => {
@@ -9,14 +9,12 @@ exports.createCard = async (data, file) => {
     throw new Error("Thẻ với tên này đã tồn tại");
   }
 
-  let image = null;
+  let imageUrl = null;
   if (file) {
-    // Resize ảnh trước khi lưu
-    const resizedImageBuffer = await resizeImage(file.buffer);
-    image = {
-      data: resizedImageBuffer,
-      contentType: file.mimetype || "image/jpeg"
-    };
+    // Upload ảnh lên Cloudinary
+     imageUrl = await uploadImage(file.buffer, "GameTheBaiG3");
+    
+    
   }
 
   // Chuẩn hóa skill (phải có name + description)
@@ -36,20 +34,11 @@ exports.createCard = async (data, file) => {
 
   // Tạo thẻ mới theo model
   const card = new Card({
-    name: data.name,
-    genCore: data.genCore,
-
-    origin: data.origin,
-    feature: data.feature,
-    symbol: data.symbol,
-
-    power: data.power,
-    defense: data.defense,
-    magic: data.magic,
+    ...data,
 
     skill: skills || [],
 
-    image: image,
+    imageUrl: imageUrl,
 
     parents: data.parents || []
   });
@@ -69,7 +58,8 @@ exports.getCardById = async (id) => {
 
 // Lấy ảnh của thẻ
 exports.getCardImageById = async (id) => {
-  return await Card.findById(id).select('image');
+  const card = await Card.findById(id).select('imageUrl');
+  return card? card.imageUrl : null;
 };
 
 // Cập nhật thẻ
@@ -106,11 +96,8 @@ exports.updateCard = async (id, data, file) => {
   card.parents = data.parents || card.parents;
 
   if (file) {
-    const resizedImageBuffer = await resizeImage(file.buffer);
-    card.image = {
-      data: resizedImageBuffer,
-      contentType: file.mimetype || "image/jpeg"
-    };
+    // Upload ảnh mới lên Cloudinary
+    card.imageUrl = await uploadImage(file.buffer, "GameTheBaiG3");
   }
 
   return await card.save();

@@ -7,7 +7,7 @@ exports.createCard = async (req, res) => {
     const card = await cardService.createCard(req.body, req.file);
     res.status(201).json({
       message: 'Thẻ bài đã được tạo thành công',
-      card: formatCard(card),
+      card,
     });
   } catch (error) {
     res.status(400).json({ error: error.message });
@@ -17,7 +17,7 @@ exports.createCard = async (req, res) => {
 exports.getAllCards = async (req, res) => {
   try {
     const cards = await cardService.getAllCards();
-    res.json(cards.map(formatCard));
+    res.json(cards);
   } catch (error) {
     res.status(400).json({ error: error.message });
   }
@@ -25,13 +25,12 @@ exports.getAllCards = async (req, res) => {
 // Lấy ảnh thẻ theo ID
 exports.getCardImageById = async (req, res) => {
   try {
-    const card = await cardService.getCardImageById(req.params.id);
-    if (!card || !card.image || !card.image.data) {
-      return res.status(404).json({ error: 'Image not found' });
+    const imageUrl = await cardService.getCardImageById(req.params.id);
+    if (!imageUrl) {
+      return res.status(404).json({ error: 'Card or image not found' });
     }
-    res.contentType(card.image.contentType);
-    res.send(card.image.data);
-  } catch (error) {
+   res.json({ imageUrl });
+  }catch (error) {
     res.status(400).json({ error: error.message });
   }
 };
@@ -44,7 +43,7 @@ exports.getCardById = async (req, res) => {
     if (!card) {
       return res.status(404).json({ error: 'Card not found' });
     }
-    res.json(formatCard(card));
+    res.json(card);
   } catch (error) {
     res.status(400).json({ error: error.message });
   }
@@ -58,7 +57,7 @@ exports.updateCard = async (req, res) => {
     }
     res.json({
       message: 'Thẻ bài đã được cập nhật thành công',
-      card: formatCard(card),
+      card,
     });
   } catch (error) {
     res.status(400).json({ error: error.message });
