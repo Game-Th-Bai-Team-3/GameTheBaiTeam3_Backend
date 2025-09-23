@@ -98,3 +98,22 @@ exports.updateCard = async (id, data, file) => {
 exports.deleteCard = async (id) => {
   return await Card.findByIdAndDelete(id);
 };
+
+exports.createCardFromImageUrl = async (imageUrl) => {
+  const placeholderCardData = {
+    name: `Placeholder Card - ${Date.now()}`,
+    genCore: 1,
+    origin: "Generated from image URL",
+    feature: "Placeholder feature",
+    symbol: "Placeholder symbol",
+    power: 50,
+    defense: 50,
+    magic: 50,
+    skill: [{ name: "Placeholder Skill", description: "This is a placeholder skill." }],
+    parents: [],
+    imageUrl: imageUrl,
+  };
+
+  const card = new Card(placeholderCardData);
+  return await card.save();
+};
