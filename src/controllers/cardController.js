@@ -1,6 +1,7 @@
 // controllers/cardController.js
 const { formatCard } = require('../helpers/cardFormatter');
 const cardService = require('../services/cardService');
+const { emitToAllFE } = require('../utils/socketHandler');
 
 exports.createCard = async (req, res) => {
   try {
@@ -29,6 +30,8 @@ exports.getCardImageById = async (req, res) => {
     if (!imageUrl) {
       return res.status(404).json({ error: 'Card or image not found' });
     }
+    // emit cho tất cả FE khi có ai đó lấy ảnh thẻ
+    emitToAllFE("newCard", { cardId: req.params.id, imageUrl });
    res.json({ imageUrl });
   }catch (error) {
     res.status(400).json({ error: error.message });
