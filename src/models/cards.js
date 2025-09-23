@@ -19,10 +19,7 @@ const cardSchema = new mongoose.Schema({
         }
     ],
 
-    image: {
-        data: Buffer,         // dữ liệu binary (nếu bạn upload ảnh trực tiếp)
-        contentType: String   // kiểu file (jpg/png)
-    },
+    imageUrl: { type: String }, // URL ảnh thẻ (nếu có)
 
     parents: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Card' }],
 

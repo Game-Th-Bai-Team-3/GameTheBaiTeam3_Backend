@@ -1,11 +1,19 @@
-const sharp = require('sharp');
+const cloudinary = require("../utils/cloudinaryConfig");
 
-exports.resizeImage = async (buffer, width = 400, height = 400) => {
-  return await sharp(buffer)
-    .resize(width, height, {
-      fit: "inside", // không crop, giữ nguyên tỉ lệ
-      withoutEnlargement: true, // ảnh nhỏ hơn thì giữ nguyên, không phóng to
-    })
-    .jpeg({ quality: 80 })
-    .toBuffer();
+// Upload image to Cloudinary
+const uploadImage = async (buffer ,folder ="GameTheBaiG3") => {
+  return new Promise((resolve, reject) => {
+    const stream = cloudinary.uploader.upload_stream(
+    { folder  },
+      (error, result) => {
+        if (error) return reject(error);
+        resolve(result.secure_url);
+      }
+    );
+stream.end(buffer);
+  });
+};
+  
+module.exports = {
+  uploadImage,
 };
