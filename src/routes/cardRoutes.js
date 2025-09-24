@@ -13,6 +13,7 @@ const {
   deleteCard,
   getCardImageById,
   createCardFromImageOnly,
+  sendCards,
 } = cardController;
 
 /**
@@ -177,11 +178,14 @@ router.post('/', protect, authorizeRoles('admin'), upload.single('image'), creat
  *           schema:
  *             type: object
  *             required:
- *               - image
+ *               - image   # chỉ image là bắt buộc
  *             properties:
  *               image:
  *                 type: string
  *                 format: binary
+ *               requestId:
+ *                 type: string
+ *                 description: ID của request đang chờ (không bắt buộc)
  *     responses:
  *       201:
  *         description: Thẻ bài đã được tạo thành công từ ảnh
@@ -192,15 +196,14 @@ router.post('/', protect, authorizeRoles('admin'), upload.single('image'), creat
  *               properties:
  *                 message:
  *                   type: string
- *                 card:
- *                   type: object
- *                   properties:
- *                     _id:
- *                       type: string
- *                     name:
- *                       type: string
- *                     imageUrl:
- *                       type: string
+ *                 cardId:
+ *                   type: string
+ *                 imageUrl:
+ *                   type: string
+ *                 parentIds:
+ *                   type: array
+ *                   items:
+ *                     type: string
  *       400:
  *         description: Dữ liệu đầu vào không hợp lệ
  *         content:
@@ -212,6 +215,8 @@ router.post('/', protect, authorizeRoles('admin'), upload.single('image'), creat
  *                   type: string
  */
 router.post('/image-only', upload.single('image'), createCardFromImageOnly);
+
+
 /**
  * @swagger
  * /cards:
@@ -373,5 +378,49 @@ router.put('/:id', protect, authorizeRoles('admin'), upload.single('image'), upd
  *         description: Không tìm thấy thẻ bài
  */
 router.delete('/:id', protect, authorizeRoles('admin'), deleteCard);
+
+
+/**
+ * @swagger
+ * /cards/merge:
+ *   post:
+ *     summary: Gộp các thẻ bài (cardIds) gửi đến C để xử lý
+ *     tags: [Cards]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - cardIds
+ *             properties:
+ *               cardIds:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *     responses:
+ *       200:
+ *         description: Yêu cầu gộp thẻ đã được gửi đến C
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                 requestId:
+ *                   type: string
+ *       400:
+ *         description: Dữ liệu đầu vào không hợp lệ
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ */
+router.post('/merge', sendCards);
 
 module.exports = router;

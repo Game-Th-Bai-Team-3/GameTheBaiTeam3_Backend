@@ -2,19 +2,44 @@
 const { formatCard } = require('../helpers/cardFormatter');
 const cardService = require('../services/cardService');
 const { emitToAllFE } = require('../utils/socketHandler');
-
+const socketHandler = require('../utils/socketHandler');
+const PendingRequest = require('../models/pendingRequest');
 exports.createCardFromImageOnly = async (req, res) => {
   try {
     const file = req.file;
+    const { requestId } = req.body;
+
     if (!file) {
       return res.status(400).json({ error: 'Image file is required' });
     }
-    const card = await cardService.createCardFromImageOnly(file);
-    // emit cho tất cả FE khi có ai đó tạo thẻ mới
-    emitToAllFE("newCard", { cardId: card._id, img: card.imageUrl });
+
+    let parentIds = [];
+    let pending = null;
+
+    if (requestId) {
+      pending = await PendingRequest.findOne({ requestId });
+      if (pending) {
+        parentIds = pending.cardIds;
+        // xóa pending sau khi dùng
+        await PendingRequest.deleteOne({ requestId });
+      }
+    }
+
+    // tạo thẻ mới với parentIds (có thể rỗng)
+    const card = await cardService.createCardFromImageOnly(file, parentIds);
+
+    // emit cho tất cả FE
+    emitToAllFE("new-card-ready", { 
+      cardId: card._id, 
+      img: card.imageUrl, 
+      parentIds 
+    });
+
     res.status(201).json({
       message: 'Thẻ bài đã được tạo thành công từ ảnh',
-      card,
+      cardId: card._id,
+      imageUrl: card.imageUrl,
+      parentIds
     });
   } catch (error) {
     res.status(400).json({ error: error.message });
@@ -97,5 +122,17 @@ exports.deleteCard = async (req, res) => {
   } catch (error) {
     res.status(400).json({ error: error.message });
   }
+};
+// lay url anh the
+exports.sendCards = async (req, res) => {
+  const { cardIds } = req.body;
+  const requestId = Date.now().toString(); // Tạo requestId duy nhất
+
+  const imageUrls = await cardService.getCardLinksByIds(cardIds);
+  // tao pending request
+  await PendingRequest.create({ requestId, cardIds });
+  // gui du lieu cho C
+  socketHandler.emitToC("process-cards", { requestId, imageUrls });
+  res.json({ message: 'Yêu cầu gửi thẻ đã được gửi đến C', requestId });
 };
 

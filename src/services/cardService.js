@@ -99,7 +99,7 @@ exports.deleteCard = async (id) => {
   return await Card.findByIdAndDelete(id);
 };
 
-exports.createCardFromImageOnly = async (file) => {
+exports.createCardFromImageOnly = async (file,parentIds = []) => {
   let imageUrl = null;
   if (file) {
     // Upload ảnh lên Cloudinary
@@ -116,10 +116,16 @@ exports.createCardFromImageOnly = async (file) => {
     defense: 50,
     magic: 50,
     skill: [{ name: "Placeholder Skill", description: "This is a placeholder skill." }],
-    parents: [],
+    parents: parentIds,
     imageUrl: imageUrl,
   };
 
   const card = new Card(placeholderCardData);
   return await card.save();
+};
+
+// lay url anh the
+exports.getCardLinksByIds = async (cardIds) => {
+  const cards = await Card.find({ _id: { $in: cardIds } }).select('imageUrl');
+  return cards.map(card => card.imageUrl);
 };

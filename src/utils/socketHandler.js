@@ -1,3 +1,5 @@
+const { emit } = require("../app");
+
 let cSocket = null;      // Chỉ giữ 1 C (máy xử lý ảnh)
 let feSockets = [];      // Danh sách tất cả FE
 
@@ -30,6 +32,11 @@ module.exports = (io) => {
       // Trả ngược lại cho C
       socket.emit("notify", { msg: "BE nhận được từ C", data });
     });
+    //  C nhan du lieu FE gui len
+    socket.on("card-recevied",({requestId})=>{
+        module.exports.emitToAllFE("cards-sent-success", { requestId, message: "C đã nhận 2 card" });
+    });
+
 
     // 👉 Khi disconnect
     socket.on("disconnect", () => {
