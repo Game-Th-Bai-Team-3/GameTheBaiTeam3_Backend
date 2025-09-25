@@ -34,9 +34,15 @@ module.exports = (io) => {
     });
     //  C nhan du lieu FE gui len
     socket.on("card-recevied",({requestId})=>{
+       console.log(`📥 C xác nhận đã nhận xong thẻ cho requestId=${requestId}`);
         module.exports.emitToAllFE("cards-sent-success", { requestId, message: "C đã nhận 2 card" });
     });
 
+     // 👉 C trong lúc gen emit tiến trình
+    socket.on("generating", ({ requestId, progress, timeLeft }) => {
+      console.log(`⚙️ Generating: req=${requestId}, progress=${progress}%, timeLeft=${timeLeft}s`);
+      module.exports.emitToAllFE("generating", { requestId, progress, timeLeft });
+    });
 
     // 👉 Khi disconnect
     socket.on("disconnect", () => {
