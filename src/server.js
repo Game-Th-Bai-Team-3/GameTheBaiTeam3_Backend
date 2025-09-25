@@ -9,6 +9,7 @@ connectDB();
 const http = require("http");
 const { Server } = require("socket.io");
 const socketHandler = require("./utils/socketHandler");
+const socketAuth = require("./middlewares/socketAuth");
 
 const PORT = process.env.PORT || 5000;
 
@@ -19,6 +20,8 @@ const server = http.createServer(app);
 const io = new Server(server, {
   cors: {origin: "*"}, // Cho phép tất cả các nguồn (thay đổi theo nhu cầu bảo mật)
 });
+// Sử dụng middleware xác thực cho Socket.IO
+io.use(socketAuth);
 
 // gan socketHandler để xử lý các sự kiện socket
 socketHandler(io);
