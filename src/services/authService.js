@@ -5,9 +5,9 @@ const { comparePassword, hashPassword } = require("../utils/bcrypt");
 const { sendResetPasswordEmail } = require("./emailService");
 const crypto = require("crypto");
 const otpGenerator = require('otp-generator');
-const  sendOtp  = require("../utils/sendOtp");
+//const  sendOtp  = require("../utils/sendOtp");
 const jwt = require("jsonwebtoken");
-
+const sendOtpEmail = require("../utils/sendgridMailer");
 
 // Đăng ký người dùng mới
 exports.register = async ({ username, email, password, role }) => {
@@ -37,7 +37,7 @@ exports.register = async ({ username, email, password, role }) => {
 
     // Thử gửi OTP qua email
     try {
-        await sendOtp(email, otp);
+        await sendOtpEmail(email, otp);
     } catch (err) {
         // Nếu gửi thất bại thì xóa OTP
         await OTP.deleteMany({ email });
@@ -106,7 +106,7 @@ exports.resendOtp = async (email) => {
     });
     // Thử gửi OTP qua email
     try {
-        await sendOtp(email, otp);
+        await sendOtpEmail(email, otp);
         return { message: "OTP mới đã được gửi thành công. Vui lòng kiểm tra email của bạn." };
     } catch (err) {
         // Nếu gửi thất bại thì xóa OTP

@@ -1,4 +1,5 @@
 const { emit } = require("../app");
+const socketAuth = require("../middlewares/socketAuth");
 
 let cSocket = null;      // Chỉ giữ 1 C (máy xử lý ảnh)
 let feSockets = [];      // Danh sách tất cả FE
@@ -10,7 +11,7 @@ module.exports = (io) => {
     // 👉 FE đăng ký
     socket.on("registerFE", () => {
       feSockets.push(socket);
-      console.log("📱 FE registered:", socket.id);
+      console.log("📱 FE registered:", socket.id, socket.user); // fe có user infor
     });
 
     // 👉 C đăng ký
