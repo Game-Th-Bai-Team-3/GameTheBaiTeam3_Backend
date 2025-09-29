@@ -53,6 +53,13 @@ exports.register = async ({ username, email, password, role }) => {
         isVerified: false
     });
 
+    //Tạo default player profile
+     if (user) {
+        await PlayerProfile.create({
+            user: user._id
+        });
+    }
+
     return { message: "Đăng ký thành công, vui lòng kiểm tra email để xác thực OTP" };
 };
 
