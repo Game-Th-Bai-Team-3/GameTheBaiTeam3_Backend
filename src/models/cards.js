@@ -22,6 +22,7 @@ const cardSchema = new mongoose.Schema({
     imageUrl: { type: String }, // URL ảnh thẻ (nếu có)
 
     parents: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Card' }],
+    combinedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User',default : null }, // Người sở hữu thẻ
 
 }, { timestamps: true });
 

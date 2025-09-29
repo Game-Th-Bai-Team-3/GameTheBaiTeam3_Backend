@@ -421,6 +421,6 @@ router.delete('/:id', protect, authorizeRoles('admin'), deleteCard);
  *                 error:
  *                   type: string
  */
-router.post('/merge', sendCards);
+router.post('/merge', protect,sendCards);
 
 module.exports = router;

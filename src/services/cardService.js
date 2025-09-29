@@ -1,3 +1,4 @@
+const { use } = require('react');
 const Card = require('../models/cards');
 const { uploadImage  } = require('./imageService');
 
@@ -41,6 +42,7 @@ exports.createCard = async (data, file) => {
     imageUrl: imageUrl,
 
     parents: data.parents || []
+    
   });
 
   return await card.save();
@@ -99,7 +101,7 @@ exports.deleteCard = async (id) => {
   return await Card.findByIdAndDelete(id);
 };
 
-exports.createCardFromImageOnly = async (file,parentIds = []) => {
+exports.createCardFromImageOnly = async (file,parentIds = [], userId = null) => {
   let imageUrl = null;
   if (file) {
     // Upload ảnh lên Cloudinary
@@ -118,6 +120,7 @@ exports.createCardFromImageOnly = async (file,parentIds = []) => {
     skill: [{ name: "Placeholder Skill", description: "This is a placeholder skill." }],
     parents: parentIds,
     imageUrl: imageUrl,
+    combinedBy: userId
   };
 
   const card = new Card(placeholderCardData);
