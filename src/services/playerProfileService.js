@@ -1,11 +1,16 @@
 const PlayerProfile = require('../models/playerProfile');
 const Card = require('../models/cards');
 
-// Tìm player profile theo userId
+// Tìm player profile theo userId, tạo mới nếu chưa có
 const findPlayerProfileByUserId = async (userId) => {
-    const playerProfile = await PlayerProfile.findOne({ user: userId });
+    let playerProfile = await PlayerProfile.findOne({ user: userId });
     if (!playerProfile) {
-        throw new Error('Không tìm thấy player profile.');
+        // Tạo profile mới nếu chưa có
+        playerProfile = await PlayerProfile.create({
+            user: userId,
+            currency: { gold: 1000, gem: 10 },
+            cards: []
+        });
     }
     return playerProfile;
 };
@@ -89,15 +94,25 @@ const removeCardFromInventory = async (userId, cardId, quantityToRemove) => {
     return playerProfile;
 };
 
-// Trả về full profile của người chơi
+// Trả về profile với thông tin cần thiết
 const getPlayerProfile = async (userId) => {
-    const playerProfile = await PlayerProfile.findOne({ user: userId })
-        .populate('user')
-        .populate('cards.card');
+    let playerProfile = await PlayerProfile.findOne({ user: userId })
+        .populate('user', 'username email role') // Chỉ lấy thông tin cơ bản user
+        .populate('cards.card', 'name imageUrl power defense magic genCore skill'); // Chỉ lấy thông tin game của thẻ
     
+    // Nếu chưa có profile, tạo mới với tiền khởi tạo
     if (!playerProfile) {
-        throw new Error('Không tìm thấy player profile.');
+        playerProfile = await PlayerProfile.create({
+            user: userId,
+            currency: { gold: 1000, gem: 10 },
+            cards: []
+        });
+        // Populate lại sau khi tạo
+        playerProfile = await PlayerProfile.findById(playerProfile._id)
+            .populate('user', 'username email role')
+            .populate('cards.card', 'name imageUrl power defense magic genCore skill');
     }
+    
     return playerProfile;
 };
 

@@ -1,6 +1,6 @@
-const { use } = require('react');
 const Card = require('../models/cards');
 const { uploadImage  } = require('./imageService');
+const { addCardToInventory } = require('./playerProfileService');
 
 // Tạo thẻ mới
 exports.createCard = async (data, file) => {
@@ -124,7 +124,19 @@ exports.createCardFromImageOnly = async (file,parentIds = [], userId = null) => 
   };
 
   const card = new Card(placeholderCardData);
-  return await card.save();
+  const savedCard = await card.save();
+
+  // Tự động thêm thẻ vào kho của người ghép thẻ
+  if (userId) {
+    try {
+      await addCardToInventory(userId, savedCard._id, 1);
+    } catch (error) {
+      console.log('Lỗi khi thêm thẻ ghép vào kho:', error.message);
+      // Không throw lỗi để không ảnh hưởng việc tạo thẻ
+    }
+  }
+
+  return savedCard;
 };
 
 // lay url anh the
