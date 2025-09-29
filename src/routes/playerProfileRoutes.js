@@ -128,7 +128,11 @@ router.get('/', protect, getPlayerProfile);
  *               operation:
  *                 type: string
  *                 enum: [add, subtract, set]
- *                 description: Phép toán (add, subtract, set)
+ *                 description: |
+ *                   Phép toán thực hiện trên tiền tệ:
+ *                   - add: Cộng thêm số tiền vào tài khoản (ví dụ: thưởng, nạp tiền)
+ *                   - subtract: Trừ tiền từ tài khoản (ví dụ: mua đồ, thanh toán)
+ *                   - set: Đặt số tiền cố định (ví dụ: reset, cheat mode)
  *                 example: add
  *     responses:
  *       200:

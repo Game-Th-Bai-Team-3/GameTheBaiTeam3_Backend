@@ -1,5 +1,6 @@
 const User = require("../models/userModel.js");
 const OTP = require("../models/otp.js");
+const PlayerProfile = require("../models/playerProfile.js");
 const { generateTokenPair  } = require("../utils/jwtToken");
 const { comparePassword, hashPassword } = require("../utils/bcrypt");
 const { sendResetPasswordEmail } = require("./emailService");
@@ -53,10 +54,12 @@ exports.register = async ({ username, email, password, role }) => {
         isVerified: false
     });
 
-    //Tạo default player profile
+    //Tạo default player profile với tiền khởi tạo
      if (user) {
         await PlayerProfile.create({
-            user: user._id
+            user: user._id,
+            currency: { gold: 1000, gem: 10 },
+            cards: []
         });
     }
 

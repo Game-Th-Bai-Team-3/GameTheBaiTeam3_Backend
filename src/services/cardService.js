@@ -1,5 +1,6 @@
 const Card = require('../models/cards');
 const { uploadImage  } = require('./imageService');
+const { addCardToInventory } = require('./playerProfileService');
 
 // Tạo thẻ mới
 exports.createCard = async (data, file) => {
@@ -41,6 +42,7 @@ exports.createCard = async (data, file) => {
     imageUrl: imageUrl,
 
     parents: data.parents || []
+    
   });
 
   return await card.save();
@@ -99,7 +101,7 @@ exports.deleteCard = async (id) => {
   return await Card.findByIdAndDelete(id);
 };
 
-exports.createCardFromImageOnly = async (file,parentIds = []) => {
+exports.createCardFromImageOnly = async (file,parentIds = [], userId = null) => {
   let imageUrl = null;
   if (file) {
     // Upload ảnh lên Cloudinary
@@ -118,10 +120,23 @@ exports.createCardFromImageOnly = async (file,parentIds = []) => {
     skill: [{ name: "Placeholder Skill", description: "This is a placeholder skill." }],
     parents: parentIds,
     imageUrl: imageUrl,
+    combinedBy: userId
   };
 
   const card = new Card(placeholderCardData);
-  return await card.save();
+  const savedCard = await card.save();
+
+  // Tự động thêm thẻ vào kho của người ghép thẻ
+  if (userId) {
+    try {
+      await addCardToInventory(userId, savedCard._id, 1);
+    } catch (error) {
+      console.log('Lỗi khi thêm thẻ ghép vào kho:', error.message);
+      // Không throw lỗi để không ảnh hưởng việc tạo thẻ
+    }
+  }
+
+  return savedCard;
 };
 
 // lay url anh the

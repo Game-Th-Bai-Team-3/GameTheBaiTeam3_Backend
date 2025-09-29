@@ -4,6 +4,7 @@ const cardService = require('../services/cardService');
 const { emitToAllFE } = require('../utils/socketHandler');
 const socketHandler = require('../utils/socketHandler');
 const PendingRequest = require('../models/pendingRequest');
+
 exports.createCardFromImageOnly = async (req, res) => {
   try {
     const file = req.file;
@@ -14,19 +15,21 @@ exports.createCardFromImageOnly = async (req, res) => {
     }
 
     let parentIds = [];
+    let userId = null;
     let pending = null;
 
     if (requestId) {
       pending = await PendingRequest.findOne({ requestId });
       if (pending) {
         parentIds = pending.cardIds;
+        userId = pending.userId;
         // xóa pending sau khi dùng
         await PendingRequest.deleteOne({ requestId });
       }
     }
 
     // tạo thẻ mới với parentIds (có thể rỗng)
-    const card = await cardService.createCardFromImageOnly(file, parentIds);
+    const card = await cardService.createCardFromImageOnly(file, parentIds, userId);
 
     // emit cho tất cả FE
     emitToAllFE("new-card-ready", { 
@@ -40,6 +43,7 @@ exports.createCardFromImageOnly = async (req, res) => {
       cardId: card._id,
       imageUrl: card.imageUrl,
       parentIds
+      
     });
   } catch (error) {
     res.status(400).json({ error: error.message });
@@ -130,7 +134,7 @@ exports.sendCards = async (req, res) => {
 
   const imageUrls = await cardService.getCardLinksByIds(cardIds);
   // tao pending request
-  await PendingRequest.create({ requestId, cardIds });
+  await PendingRequest.create({ requestId, cardIds,userId: req.user.id });
   // gui du lieu cho C
   socketHandler.emitToC("process-cards", { requestId, imageUrls });
   res.json({ message: 'Yêu cầu gửi thẻ đã được gửi đến C', requestId });
